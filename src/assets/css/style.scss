@@ -330,3 +330,33 @@ footer{
         }
     }
 }
+
+.login-form{
+    .card{
+        width: 450px;
+    }
+}
+
+.dashboard{
+    .card{
+        min-height: 400px;
+    }
+}
+
+.sidebar{
+    ul{
+        li{
+            a{
+                text-decoration: none;
+                color: black;
+                font-weight: 500;
+                display: block;
+                padding: 10px 0;
+                border-bottom: 1px solid rgb(73, 70, 70);
+                &:hover{
+                    color: $primary-color;
+                }
+            }
+        }
+    }
+}
