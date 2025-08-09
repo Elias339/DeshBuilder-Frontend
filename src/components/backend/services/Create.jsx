@@ -11,8 +11,7 @@ import JoditEditor from 'jodit-react';
 const Create = ({placeholder}) => {
     const editor = useRef(null);
     const [content, setContent] = useState('');
-    const [isDisable, setIsDisable] = useState(false);
-    const [imageId, setImageId] = useState(null);
+    const [isDisable, setIsDisable] = useState(false); 
 
     const config = useMemo(() => ({
 			readonly: false,  
@@ -23,8 +22,7 @@ const Create = ({placeholder}) => {
 
    const {
     register,
-    handleSubmit,
-    watch,
+    handleSubmit, 
     setValue,
     formState: { errors },
   } = useForm()
@@ -32,51 +30,34 @@ const Create = ({placeholder}) => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    const newData = { ...data, "content": content, "imageId":imageId}
-    const res = await fetch(apiUrl + 'services',{
-        'method': 'POST',
-        'headers':{
-            'Content-type' : 'application/json',
-            'Accept': 'application/json', 
-            'Authorization': `Bearer ${token()}`
-        },
-        body: JSON.stringify(newData)
-    });
-    const result = await res.json();
-
-    if(result.status == true){
-      toast.success(result.message);   
-      navigate('/admin/services');
-    }else{
-       toast.errors(result.message);  
-    } 
-    
+  const formData = new FormData();
+  formData.append("title", data.title);
+  formData.append("slug", data.slug);
+  formData.append("short_desc", data.short_desc || "");
+  formData.append("text_content", content || "");
+  formData.append("status", data.status);
+  if (data.image && data.image.length > 0) {
+    formData.append("image", data.image[0]);
   }
 
-  const handleFile = async (e) => {
-      const formData = new FormData();
-      const file = e.target.files[0];
-      formData.append("image",file);
+  const res = await fetch(apiUrl + 'services', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token()}`
+    },
+    body: formData
+  });
 
-      await fetch(apiUrl + 'temp-images',{
-        'method': 'POST',
-        'headers':{ 
-            'Accept': 'application/json', 
-            'Authorization': `Bearer ${token()}`
-        },
-        body: formData
-    })
-    .then(responce => responce.json())
-    .then(result => {
-      if (result.status == false) {
-        toast.error(result.errors.image[0])
-      }else{
-        setImageId(result.data.id)
-      }
-    })
+  const result = await res.json();
 
-    }
-
+  if (result.status) {
+    toast.success(result.message);
+    navigate('/admin/services');
+  } else {
+    toast.error(result.errors ? Object.values(result.errors)[0][0] : result.message);
+  }
+};
+ 
   return (
     <>
        <Header/>
@@ -147,7 +128,8 @@ const Create = ({placeholder}) => {
 
                             <div className='mb-3'>
                                 <label htmlFor="" className='form-label'>Image</label>
-                                <input onChange={handleFile} type="file" className='form-control' />
+                                <input type="file"  className='form-control' {...register('image')} />
+                                {/* <input onChange={handleFile} type="file" className='form-control' /> */}
                             </div>
 
                             <div className='mb-3'>

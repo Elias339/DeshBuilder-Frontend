@@ -1,14 +1,12 @@
-import Header from '../common/Header'
-import Footer from '../common/Footer'
-import Hero from '../common/Hero' 
+import ServiceImg from '../../assets/images/construction1.jpg';
 import { apiUrl, fileUrl } from '../common/http';
 import React, { useEffect, useState } from 'react' 
 
-const Services = () => {
-    const [services, setServices] = useState([]);
+const LatestServices = () => {
 
+    const [services, setServices] = useState([]);
     const fatchLatestServices = async () => {
-        const res = await fetch(apiUrl + 'get-services',{
+        const res = await fetch(apiUrl + 'get-latest-services?limit=4',{
             'method': 'GET',  
         });
         const result = await res.json(); 
@@ -16,22 +14,13 @@ const Services = () => {
     }
 
     useEffect(()=>{
-        fatchLatestServices()
+      fatchLatestServices()
     },[]);
-    
 
   return (
-    <>
-    <Header/>
-    <main>
-        {/* Hero Section */}
-        <Hero preHeading='Services' 
-              heading='Our Services' 
-              text='Lorem ipsum dolor sit amet consectetur, adipisicing elit. <br />Dolore ullam laboriosam' />
-
-       {/* Our Services */}
-        <section className='section-3 bg-light py-5'>
-            <div className='container py-5'>
+     <>
+      <section className='section-3 bg-light py-5'>
+            <div className='container-fluid py-5'>
                 <div className='section-header text-center'>
                     <span>Our services</span>
                     <h2>Our construction services</h2>
@@ -42,10 +31,10 @@ const Services = () => {
                     {
                         services && services.map(service => {
                             return(
-                            <div className='col-md-4 col-lg-4'>
+                            <div className='col-md-3 col-lg-3'>
                                 <div className='item'>
                                     <div className='service-image'>
-                                        <img src={`${fileUrl}storage/${service.image}`} className='w-100' />                                    
+                                        <img src={`${fileUrl}storage/${service.image}`} className='w-100' /> 
                                     </div>
                                     <div className='service-body'>
                                         <div className='service-title'>
@@ -61,13 +50,12 @@ const Services = () => {
                             )
                         })
                     }
+  
                 </div>
             </div>
-        </section>      
-    </main>
-    <Footer/>
-    </> 
+        </section>
+     </>
   )
 }
 
-export default Services
+export default LatestServices

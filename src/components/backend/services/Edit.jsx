@@ -13,8 +13,7 @@ const Edit = ({placeholder}) => {
 const editor = useRef(null);
     const [content, setContent] = useState('');
     const [service, setService] = useState('');
-    const [isDisable, setIsDisable] = useState(false);
-    const [imageId, setImageId] = useState(null);
+    const [isDisable, setIsDisable] = useState(false); 
     const params = useParams();
 
     const config = useMemo(() => ({
@@ -24,82 +23,66 @@ const editor = useRef(null);
         [placeholder]
     );
 
-   const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm({
+   const { register, handleSubmit,  setValue, formState: { errors }, } = useForm({
     defaultValues: async() => {
         const res = await fetch(apiUrl + 'services/'+params.id,{
-                'method': 'GET',
-                'headers':{
-                    'Content-type' : 'application/json',
-                    'Accept': 'application/json', 
-                    'Authorization': `Bearer ${token()}`
-                }
-            });
-            const result = await res.json();
-            setContent(result.data.text_content);
-            setService(result.data);
-            return {
-                title: result.data.title,
-                slug: result.data.slug,
-                short_desc: result.data.short_desc,
-                status: result.data.status,
+            'method': 'GET',
+            'headers':{
+                'Content-type' : 'application/json',
+                'Accept': 'application/json', 
+                'Authorization': `Bearer ${token()}`
             }
-            
+        });
+        const result = await res.json();
+        setContent(result.data.text_content);
+        setService(result.data);
+        return {
+            title: result.data.title,
+            slug: result.data.slug,
+            short_desc: result.data.short_desc,
+            status: result.data.status,
+        }    
     }
   })
 
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-      const newData = { ...data, "content": content, "imageId":imageId}
-      const res = await fetch(apiUrl + 'services/'+params.id,{
-          'method': 'PUT',
-          'headers':{
-              'Content-type' : 'application/json',
-              'Accept': 'application/json', 
-              'Authorization': `Bearer ${token()}`
-          },
-          body: JSON.stringify(newData)
-      });
-      const result = await res.json();
-  
-      if(result.status == true){
-        toast.success(result.message);   
-        navigate('/admin/services');
-      }else{
-         toast.errors(result.message);  
-      } 
-      
-    }
+  const formData = new FormData();
+  formData.append("title", data.title);
+  formData.append("slug", data.slug);
+  formData.append("short_desc", data.short_desc || "");
+  formData.append("text_content", content || "");
+  formData.append("status", data.status);
 
-    const handleFile = async (e) => {
-          const formData = new FormData();
-          const file = e.target.files[0];
-          formData.append("image",file);
-    
-          await fetch(apiUrl + 'temp-images',{
-            'method': 'POST',
-            'headers':{ 
-                'Accept': 'application/json', 
-                'Authorization': `Bearer ${token()}`
-            },
-            body: formData
-        })
-        .then(responce => responce.json())
-        .then(result => {
-          if (result.status == false) {
-            toast.error(result.errors.image[0])
-          }else{
-            setImageId(result.data.id)
-          }
-        })
-    
-    }
+  if (data.image && data.image.length > 0) {
+    formData.append("image", data.image[0]);
+  }
+
+  const res = await fetch(apiUrl + 'services/' + params.id, {
+    method: 'POST',  
+    headers: {
+      'Authorization': `Bearer ${token()}`
+    },
+    body: (() => {
+      formData.append('_method', 'PUT');  
+      return formData;
+    })(),
+  });
+
+  const result = await res.json();
+
+  if (result.status) {
+    toast.success(result.message);
+    navigate('/admin/services');
+  } else {
+    toast.error(result.errors ? Object.values(result.errors)[0][0] : result.message);
+  }
+
+ };
+
+
+     
 
   return (
     <>
@@ -171,13 +154,13 @@ const editor = useRef(null);
 
                             <div className='mb-3'>
                                 <label htmlFor="" className='form-label'>Image</label>
-                                <input onChange={handleFile} type="file" className='form-control' />
+                                <input type="file" className='form-control' {...register('image')} />
                             </div>
 
                             <div className='pb-3'>
-                                {
-                                    service.image && <img src={fileUrl+'uploads/services/small/'+service.image} alt="" />
-                                }
+                               {
+                                 service.image && ( <img src={fileUrl + 'storage/' + service.image} alt="Service" width="150" /> )  
+                               }     
                             </div>
 
                             <div className='mb-3'>

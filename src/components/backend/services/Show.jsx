@@ -25,7 +25,7 @@ const Show = () => {
      }
 
      const deleteService = async (id) => {
-
+      
       if(confirm("Are you sure you want to delete?")){
         const res = await fetch(apiUrl + 'services/'+id,{
             'method': 'DELETE',
@@ -112,7 +112,7 @@ const Show = () => {
                           
                       </div>
                   </div>
-                </div>
+               </div>
             </div>
           </div>
        </main>
